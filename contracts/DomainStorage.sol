@@ -12,6 +12,14 @@ contract DomainStorage {
     uint256 public domainCost;
     Domain[] public domains;
 
+    /// @notice Event during the registration of a new domain
+    event DomainAdded(
+        address indexed from,
+        uint indexed when,
+        string domain,
+        address domainOwner
+    );
+
     /// @notice Domain structure that contains a domain name and the owner address
     struct Domain {
         string domainName;
@@ -72,6 +80,7 @@ contract DomainStorage {
         }
         require(!isOwned, "Domain already owned");
         domains.push(Domain(_domain, _owner));
+        emit DomainAdded(msg.sender, block.timestamp, _domain, _owner);
     }
 
     /// @return The number of registered domains

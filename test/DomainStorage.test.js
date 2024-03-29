@@ -6,11 +6,11 @@ const tokens = (n) => {
 
 describe("DomainStorage", () => {
     let contract
-    let deployer, owner1
+    let deployer, owner1, owner2
 
     beforeEach(async  () => {
         // Setup
-        [deployer, owner1] = await ethers.getSigners();
+        [deployer, owner1, owner2] = await ethers.getSigners();
 
         // Deploy
         const factory = await ethers.getContractFactory('DomainStorage');
@@ -74,7 +74,7 @@ describe("DomainStorage", () => {
     })
 
     describe("Domain", () => {
-        it("Check first domain", async  () => {
+        it("Check first domain", async () => {
             let domain = await contract.domains(0);
             expect(domain.domainName).to.be.equal("test");
             expect(domain.domainOwner).to.be.equal(owner1);
@@ -82,6 +82,28 @@ describe("DomainStorage", () => {
         it("Check add owned domain", async () => {
             await expect(contract.connect(owner1).add("test", owner1.address, { value: tokens(1) }))
                 .to.be.revertedWith("Domain already owned");
+        })
+    })
+
+    describe("DomainStorage", () => {
+        it("should emit a DomainAdded event with correct data", async () =>  {
+            const contractEvent = await ethers.deployContract("DomainStorage", [tokens(1)]);
+            contractEvent.on("DomainAdded", (from, when, domain, domainOwner) => {
+                console.log("[%d] Added a new domain %s for %s from %s controller", when, domain, domainOwner, from);
+            });
+
+            await contractEvent.connect(deployer).add("test1", owner1.address, { value: tokens(1) });
+            await contractEvent.connect(owner1).add("test2", owner2.address, { value: tokens(1) });
+            await contractEvent.connect(owner2).add("test3", deployer.address, { value: tokens(1) });
+            await contractEvent.connect(deployer).add("test4", owner2.address, { value: tokens(1) });
+            await contractEvent.connect(deployer).add("test5", owner1.address, { value: tokens(1) });
+
+            const filter = contractEvent.filters.DomainAdded(deployer.address, null, null, null);
+            const logs = await contractEvent.queryFilter(filter, 1, "latest");
+            logs.map((log) => {
+                console.log("log.args: ", log.args);
+            });
+            expect(logs.length).to.equal(3);
         })
     })
 })
