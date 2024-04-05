@@ -40,7 +40,7 @@ describe("DomainStorage", () => {
             );
         })
         it("Get domains count", async () => {
-            const result = await contract.connect(deployer).getDomainsCount();
+            const result = await contract.connect(deployer).domainCount();
             expect(result).to.be.equal("1");
         })
         it("Get balance", async () => {
@@ -66,9 +66,8 @@ describe("DomainStorage", () => {
 
     describe("Domain", () => {
         it("Check first domain", async () => {
-            let domain = await contract.domains(0);
-            expect(domain.domainName).to.be.equal("test");
-            expect(domain.domainOwner).to.be.equal(owner1);
+            let domain = await contract.domains("test");
+            expect(domain).to.be.equal(owner1);
         })
         it("Check add owned domain", async () => {
             await expect(contract.connect(owner1).buyDomain("test", owner1.address, { value: tokens(1) }))

@@ -12,13 +12,8 @@ contract DomainStorage {
 
     address public owner;
     uint256 public domainCost;
-    Domain[] public domains;
-
-    /// @notice Domain structure that contains a domain name and the owner address
-    struct Domain {
-        string domainName;
-        address domainOwner;
-    }
+    uint64 public domainCount;
+    mapping(string => address) public domains;
 
     /// @notice Event during the registration of a new domain
     event DomainAdded(
@@ -72,22 +67,12 @@ contract DomainStorage {
      */
     function buyDomain(string memory domain, address buyer) external payable checkSingleDomain(domain) {
         require(msg.value == domainCost, "Incorrect domain payment");
-        bool isOwned = false;
-        bytes32 domainHash = keccak256(abi.encodePacked(domain));
-        for (uint i = 0; i < domains.length; ++i) {
-            if (domainHash == keccak256(abi.encodePacked(domains[i].domainName))) {
-                isOwned = true;
-                break;
-            }
+        if (domains[domain] != address(0x0)) {
+            revert("Domain already owned");
         }
-        require(!isOwned, "Domain already owned");
-        domains.push(Domain(domain, buyer));
+        domains[domain] = buyer;
+        ++domainCount;
         emit DomainAdded(msg.sender, block.timestamp, domain, buyer);
-    }
-
-    /// @return The number of registered domains
-    function getDomainsCount() external view returns(uint) {
-        return domains.length;
     }
 
     /**
@@ -95,6 +80,7 @@ contract DomainStorage {
      * @dev Can only be changed by the contract owner
      */
     function updateCost(uint256 newCost) external {
+        require(newCost > 0, "Free domains are not available");
         if (msg.sender != owner) {
             revert Unauthorized();
         }
