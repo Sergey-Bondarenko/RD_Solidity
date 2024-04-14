@@ -6,6 +6,7 @@ const tokens = (n) => {
 
 describe("DomainStorage", () => {
     let contract
+    let DSContract
     let deployer, owner1, owner2
 
     beforeEach(async  () => {
@@ -13,8 +14,8 @@ describe("DomainStorage", () => {
         [deployer, owner1, owner2] = await ethers.getSigners();
 
         // Deploy
-        const factory = await ethers.getContractFactory('DomainStorage');
-        contract = await factory.deploy(tokens(1));
+        DSContract = await ethers.getContractFactory('DomainStorage');
+        contract = await upgrades.deployProxy(DSContract, [tokens(1)]);
 
         // Add a domain
         const transaction = await contract.connect(deployer).buyDomain("test", owner1.address, { value: tokens(1) });
@@ -77,8 +78,8 @@ describe("DomainStorage", () => {
 
     describe("DomainStorage", () => {
         it("should emit a DomainAdded event with correct data", async () =>  {
-            const contractEvent = await ethers.deployContract("DomainStorage", [tokens(1)]);
-            contractEvent.on("DomainAdded", (from, when, domain, domainOwner) => {
+            const contractEvent = await upgrades.deployProxy(DSContract, [tokens(1)]);
+            await contractEvent.on("DomainAdded", (from, when, domain, domainOwner) => {
                 console.log("[%d] Added a new domain %s for %s from %s controller", when, domain, domainOwner, from);
             });
 
