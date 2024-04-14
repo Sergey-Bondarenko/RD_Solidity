@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
 /**
  * @title Domain controller
  * @author Serhii Bondarenko
@@ -8,7 +10,7 @@ pragma solidity ^0.8.0;
  * @dev The contract owner can change the price of domains and withdraw ether from the contract
  * @custom:experimental This is an experimental contract.
  */
-contract DomainStorage {
+contract DomainStorage is Initializable {
 
     address public owner;
     uint256 public domainCost;
@@ -54,7 +56,7 @@ contract DomainStorage {
      * @param _domainCost The price of each domain in Ether
      * @dev Set deployer as the contract owner
      */
-    constructor(uint256 _domainCost) {
+    function initialize(uint256 _domainCost) public initializer  {
         owner = msg.sender;
         domainCost = _domainCost;
     }
