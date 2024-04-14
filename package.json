@@ -9,8 +9,7 @@
     "hardhat:compile": "hardhat compile",
     "hardhat:compile:force": "hardhat compile --force",
     "hardhat:test": "hardhat test",
-    "hardhat:deploy:lock": "hardhat run scripts/TBD.js --network localhost",
-    "hardhat:deploy:counter": "hardhat run scripts/TBD.js --network sepolia",
+    "hardhat:upgrade": "hardhat run scripts/upgrade.js --network localhost",
     "hardhat:deploy:sepolia": "MNEMONIC= INFURA_API_KEY= hardhat run scripts/TBD.js --network sepolia"
   },
   "keywords": [],
@@ -21,6 +20,7 @@
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
     "@openzeppelin/hardhat-upgrades": "^3.0.5",
     "ethers": "^6.11.1",
-    "hardhat": "^2.22.2"
+    "hardhat": "^2.22.2",
+    "solidity-stringutils": "github:LayerZero-Labs/solidity-stringutils"
   }
 }
